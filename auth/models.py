@@ -4,7 +4,6 @@ from sqlalchemy import Column, ForeignKey, Integer, String, create_engine, DateT
 from sqlalchemy.orm import DeclarativeBase
 
 
-
 class Base(DeclarativeBase):
     pass
 

@@ -16,4 +16,3 @@ class UserProfile(BaseModel):
     username: str
     email: EmailStr
     role: str
-

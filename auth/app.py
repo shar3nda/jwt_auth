@@ -14,7 +14,7 @@ app = FastAPI()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-SECRET_KEY = 'VerySecureSecretKey'
+SECRET_KEY = "VerySecureSecretKey"
 
 
 @app.post("/register", response_model=UserProfile)
@@ -68,8 +68,6 @@ def read_profile(token: str = Depends(oauth2_scheme), db: Session = Depends(get_
         user = db.query(UserModel).get(user_id)
         if not user:
             raise HTTPException(status_code=404, detail="User not found")
-        return UserProfile(
-            username=user.username, email=user.email, role=user.role
-        )
+        return UserProfile(username=user.username, email=user.email, role=user.role)
     except JWTError:
         raise HTTPException(status_code=401, detail="Could not validate credentials")
