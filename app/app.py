@@ -65,7 +65,7 @@ def login(
     :param form_data: form data
     :param db: database session
     :return: JWT token
-    :raises HTTPException 401: if the user is not authenticated
+    :raises HTTPException 401: if the user doesn't exist or the password is incorrect
     """
     user = db.query(UserModel).filter(UserModel.email == form_data.username).first()
     if not user or not bcrypt.checkpw(
