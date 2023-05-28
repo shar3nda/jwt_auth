@@ -22,7 +22,13 @@ with open("private_key.pem", "r") as f:
 
 @app.post("/register", response_model=UserProfile)
 def register(user: UserCreate, db: Session = Depends(get_db)):
-    # if user exists, raise an exception
+    """
+    Register a new user
+    :param user: user data
+    :param db: database session
+    :return: user profile
+    :raises HTTPException 400: if the user already exists
+    """
     db_user = db.query(UserModel).filter(UserModel.email == user.email).first()
     if db_user:
         raise HTTPException(
@@ -48,6 +54,13 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
 def login(
     form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)
 ):
+    """
+    Authenticate a user and return a JWT token
+    :param form_data: form data
+    :param db: database session
+    :return: JWT token
+    :raises HTTPException 401: if the user is not authenticated
+    """
     user = db.query(UserModel).filter(UserModel.email == form_data.username).first()
     if not user or not bcrypt.checkpw(
         form_data.password.encode(), user.password_hash.encode()
@@ -71,6 +84,14 @@ def login(
 
 @app.get("/profile", response_model=UserProfile)
 def read_profile(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    """
+    Get user information
+    :param token: JWT token
+    :param db: database session
+    :return: user profile
+    :raises HTTPException 401: if the user's credentials are invalid
+    :raises HTTPException 404: if the user is not found
+    """
     try:
         payload = jwt.decode(token, PUBLIC_KEY, algorithms=["RS256"])  # use RS256
         user_id = payload.get("id")

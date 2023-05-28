@@ -12,6 +12,10 @@ SessionLocal = sessionmaker(engine, autocommit=False, autoflush=False, future=Tr
 
 
 def get_db():
+    """
+    A wrapper to get the database session
+    :return: database session
+    """
     db = SessionLocal()
     try:
         yield db
