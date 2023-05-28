@@ -22,6 +22,13 @@ with open("private_key.pem", "r") as f:
 
 @app.post("/register", response_model=UserProfile)
 def register(user: UserCreate, db: Session = Depends(get_db)):
+    # if user exists, raise an exception
+    db_user = db.query(UserModel).filter(UserModel.email == user.email).first()
+    if db_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The user with this username already exists in the system",
+        )
     hashed_password = bcrypt.hashpw(user.password.encode(), bcrypt.gensalt()).decode()
     db_user = UserModel(
         username=user.username,
