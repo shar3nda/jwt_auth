@@ -27,13 +27,19 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     :param user: user data
     :param db: database session
     :return: user profile
-    :raises HTTPException 400: if the user already exists
+    :raises HTTPException 400: if the user with this email or username already exists
     """
     db_user = db.query(UserModel).filter(UserModel.email == user.email).first()
     if db_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="The user with this email already exists in the system",
+        )
+    db_user = db.query(UserModel).filter(UserModel.username == user.username).first()
+    if db_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="The user with this username already exists in the system",
         )
     hashed_password = bcrypt.hashpw(user.password.encode(), bcrypt.gensalt()).decode()
     db_user = UserModel(
