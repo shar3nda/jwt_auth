@@ -1,13 +1,13 @@
 from datetime import timedelta, datetime
 
+import bcrypt
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
-import bcrypt
 
 from .database import get_db
-from .models import UserModel, SessionModel
+from .models import UserModel
 from .schema import UserCreate, UserProfile, Token
 
 app = FastAPI()
@@ -60,6 +60,7 @@ def login(
     token = jwt.encode(
         {
             "id": user.id,
+            "role": user.role,
             "exp": expires,
         },
         PRIVATE_KEY,
