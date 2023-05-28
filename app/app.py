@@ -33,7 +33,7 @@ def register(user: UserCreate, db: Session = Depends(get_db)):
     if db_user:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="The user with this username already exists in the system",
+            detail="The user with this email already exists in the system",
         )
     hashed_password = bcrypt.hashpw(user.password.encode(), bcrypt.gensalt()).decode()
     db_user = UserModel(
