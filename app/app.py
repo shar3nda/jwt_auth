@@ -14,10 +14,11 @@ app = FastAPI()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-with open("public_key.pem", "rb") as f:
+with open("public_key.pem", "r") as f:
     PUBLIC_KEY = f.read()
-with open("private_key.pem", "rb") as f:
+with open("private_key.pem", "r") as f:
     PRIVATE_KEY = f.read()
+
 
 @app.post("/register", response_model=UserProfile)
 def register(user: UserCreate, db: Session = Depends(get_db)):
