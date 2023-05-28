@@ -1,10 +1,10 @@
-import datetime
+from datetime import timedelta, datetime
 
-import bcrypt
 from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 from sqlalchemy.orm import Session
+import bcrypt
 
 from .database import get_db
 from .models import UserModel, SessionModel
@@ -14,8 +14,10 @@ app = FastAPI()
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
 
-SECRET_KEY = "VerySecureSecretKey"
-
+with open("public_key.pem", "rb") as f:
+    PUBLIC_KEY = f.read()
+with open("private_key.pem", "rb") as f:
+    PRIVATE_KEY = f.read()
 
 @app.post("/register", response_model=UserProfile)
 def register(user: UserCreate, db: Session = Depends(get_db)):
@@ -46,24 +48,22 @@ def login(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password",
         )
-    expires = datetime.datetime.utcnow() + datetime.timedelta(minutes=60)
+    expires = datetime.utcnow() + timedelta(minutes=60)
     token = jwt.encode(
         {
             "id": user.id,
             "exp": expires,
         },
-        SECRET_KEY,
+        PRIVATE_KEY,
+        algorithm="RS256",  # use RS256
     )
-    new_session = SessionModel(user_id=user.id, session_token=token, expires_at=expires)
-    db.add(new_session)
-    db.commit()
     return {"access_token": token, "token_type": "bearer"}
 
 
 @app.get("/profile", response_model=UserProfile)
 def read_profile(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        payload = jwt.decode(token, PUBLIC_KEY, algorithms=["RS256"])  # use RS256
         user_id = payload.get("id")
         user = db.query(UserModel).get(user_id)
         if not user:
